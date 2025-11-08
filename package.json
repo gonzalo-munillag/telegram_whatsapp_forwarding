@@ -1,0 +1,28 @@
+{
+  "name": "telegram-whatsapp-bridge",
+  "version": "1.0.0",
+  "description": "Bidirectional message forwarding between Telegram and WhatsApp",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "node index.js",
+    "test:telegram": "node test-telegram.js",
+    "test:whatsapp": "node test-whatsapp.js"
+  },
+  "keywords": [
+    "telegram",
+    "whatsapp",
+    "bridge",
+    "forwarding"
+  ],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "telegram": "^2.22.2",
+    "whatsapp-web.js": "^1.23.0",
+    "qrcode-terminal": "^0.12.0",
+    "dotenv": "^16.3.1",
+    "input": "^1.0.1"
+  }
+}
+
