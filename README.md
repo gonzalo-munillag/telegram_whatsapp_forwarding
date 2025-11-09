@@ -194,6 +194,55 @@ node test-whatsapp.js
 
 ---
 
+### Optional: WhatsApp Metadata Inspector 🔍
+
+Want to understand exactly what metadata WhatsApp collects from your messages? This project includes a comprehensive metadata analysis tool.
+
+#### Running the Inspector
+
+```bash
+node test-whatsapp-metadata.js
+```
+
+#### What It Does
+
+The metadata inspector captures and analyzes **47+ data points** from every WhatsApp message, showing you:
+
+**🔴 Server-Side Data (What Meta Can See):**
+- Phone numbers, timestamps, message IDs
+- Device information (type, OS, IP address, location)
+- Communication patterns (frequency, volume, relationships)
+- Message metadata (delivery status, forward count, reply chains)
+- Media types and file sizes (but not content)
+- Link URLs ⚠️ **NOT encrypted**
+- Shared GPS coordinates ⚠️ **NOT encrypted**
+- Group information (members, admins, activity)
+- Call metadata (duration, participants, call type)
+
+**🟢 Client-Side Only (E2E Encrypted):**
+- Message text content
+- Media content (images, videos, documents)
+- Voice messages
+- Contact names (local only)
+- Message reactions
+
+#### How to Use
+
+1. **Start the inspector:**
+   ```bash
+   node test-whatsapp-metadata.js
+   ```
+
+2. **Send yourself a WhatsApp message** (or wait for an incoming message)
+
+3. **Check the generated logs:**
+   - `metadata_logs/terminal_logs/` - Human-readable analysis
+   - `metadata_logs/message_objects/` - Raw message JSON
+   - `metadata_logs/chat_objects/` - Chat metadata JSON
+   - `metadata_logs/raw_data_structures/` - Complete raw data
+
+---
+
 ### Step 6 & 7: Run the Bidirectional Bridge 🌉
 
 Now for the main event - the actual message forwarding bridge!
@@ -495,19 +544,27 @@ Single image works on both!
 
 ```
 telegram_whatsapp_forwarding/
-├── index.js              # Main bridge (515 lines)
-├── test-telegram.js      # Telegram auth test
-├── test-whatsapp.js      # WhatsApp auth test
-├── get-friend-id.js      # ID discovery tool
-├── deploy.sh             # Docker build/push script
-├── Dockerfile            # Container definition
-├── docker-compose.yml    # Orchestration config
-├── package.json          # Dependencies
-├── .env                  # Your config (gitignored)
-├── .env.example          # Config template
-├── .gitignore            # Excludes sensitive files
-├── .dockerignore         # Optimizes Docker builds
-└── README.md             # This file
+├── index.js                   # Main bridge (515 lines)
+├── test-telegram.js           # Telegram auth test
+├── test-whatsapp.js           # WhatsApp auth test
+├── test-whatsapp-metadata.js  # Metadata inspector (2,194 lines)
+├── get-friend-id.js           # ID discovery tool
+├── deploy.sh                  # Docker build/push script
+├── Dockerfile                 # Container definition
+├── docker-compose.yml         # Orchestration config
+├── package.json               # Dependencies
+├── .env                       # Your config (gitignored)
+├── .env.example               # Config template
+├── .gitignore                 # Excludes sensitive files
+├── .dockerignore              # Optimizes Docker builds
+├── README.md                  # This file
+├── METADATA_PRIVACY.md        # Privacy analysis (1,054 lines)
+├── blogpost.md                # Technical deep dive (gitignored)
+└── metadata_logs/             # Inspector output (gitignored)
+    ├── terminal_logs/         # Human-readable reports
+    ├── message_objects/       # Raw message JSON
+    ├── chat_objects/          # Chat metadata JSON
+    └── raw_data_structures/   # Complete raw data
 ```
 
 ---
