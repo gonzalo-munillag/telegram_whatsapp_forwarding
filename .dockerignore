@@ -73,3 +73,7 @@ deploy.sh
 deploy_custom.sh
 send_env2rpi.sh
 *.sh
+
+wireshark/
+*.pcap
+*.pcapng

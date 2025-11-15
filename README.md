@@ -194,52 +194,141 @@ node test-whatsapp.js
 
 ---
 
-### Optional: WhatsApp Metadata Inspector 🔍
+### Wireshark Network Analysis: Showing what is E2E Encrypted 🔬
 
-Want to understand exactly what metadata WhatsApp collects from your messages? This project includes a comprehensive metadata analysis tool.
+**Goal:** Capture WhatsApp Web traffic, decrypt TLS, and show which metadata is truly E2E encrypted vs server-visible.
 
-#### Running the Inspector
+**Method:** Packet capture → TLS decryption → Identify encrypted blobs (Signal Protocol) vs plaintext.
+
+---
+
+#### Step 1: Install Wireshark on Raspberry Pi
 
 ```bash
-node test-whatsapp-metadata.js
+# Update and install
+sudo apt update
+sudo apt install wireshark -y
 ```
 
-#### What It Does
+**During install:** When asked "Should non-superusers capture packets?" → **YES**
 
-The metadata inspector captures and analyzes **47+ data points** from every WhatsApp message, showing you:
+```bash
+# Configure non-root capture
+sudo usermod -a -G wireshark $USER
+sudo setcap 'CAP_NET_RAW+eip CAP_NET_ADMIN+eip' /usr/bin/dumpcap
 
-**🔴 Server-Side Data (What Meta Can See):**
-- Phone numbers, timestamps, message IDs
-- Device information (type, OS, IP address, location)
-- Communication patterns (frequency, volume, relationships)
-- Message metadata (delivery status, forward count, reply chains)
-- Media types and file sizes (but not content)
-- Link URLs ⚠️ **NOT encrypted**
-- Shared GPS coordinates ⚠️ **NOT encrypted**
-- Group information (members, admins, activity)
-- Call metadata (duration, participants, call type)
+# Reboot for changes
+sudo reboot
+```
 
-**🟢 Client-Side Only (E2E Encrypted):**
-- Message text content
-- Media content (images, videos, documents)
-- Voice messages
-- Contact names (local only)
-- Message reactions
+**Verify after reboot:**
+```bash
+wireshark --version
+getcap /usr/bin/dumpcap  # Should show: cap_net_admin,cap_net_raw=eip
+```
 
-#### How to Use
+---
 
-1. **Start the inspector:**
-   ```bash
-   node test-whatsapp-metadata.js
-   ```
+#### Step 2: Deploy Updated Docker Image with SSL Key Export
 
-2. **Send yourself a WhatsApp message** (or wait for an incoming message)
+**On your Mac (development machine):**
 
-3. **Check the generated logs:**
-   - `metadata_logs/terminal_logs/` - Human-readable analysis
-   - `metadata_logs/message_objects/` - Raw message JSON
-   - `metadata_logs/chat_objects/` - Chat metadata JSON
-   - `metadata_logs/raw_data_structures/` - Complete raw data
+```bash
+# 1. Commit the Docker changes
+git add Dockerfile docker-compose.yml .gitignore
+git commit -m "Add Wireshark SSL key logging to Docker"
+git push
+
+# 2. Rebuild and push Docker image
+docker build -t YOUR_DOCKERHUB_USERNAME/tgwabridge:latest .
+docker push YOUR_DOCKERHUB_USERNAME/tgwabridge:latest
+```
+
+**On your Raspberry Pi:**
+
+```bash
+# 1. Navigate to your bridge directory
+cd /var/www/tgwabridge
+
+# 2. Create wireshark directory (will be mounted as volume)
+mkdir -p wireshark
+
+# 3. Pull updated Docker image
+docker-compose pull
+
+# 4. Recreate container with new image
+docker-compose up -d
+
+# 5. Verify SSL key file will be created
+ls -la wireshark/
+```
+
+**Expected:** `wireshark/` directory exists (empty for now, will be populated when container runs)
+
+---
+
+#### Step 3: Start Packet Capture on Pi
+
+**Install tshark (if not already installed from Step 1):**
+```bash
+sudo apt install tshark -y
+```
+
+**Start capturing Docker container traffic:**
+```bash
+# Navigate to bridge directory
+cd /var/www/tgwabridge
+
+# Start tshark (captures ALL Pi network traffic including Docker)
+tshark -i any -w wireshark/whatsapp-capture.pcapng
+```
+
+**Expected output:**
+```
+Capturing on 'any'
+    1
+    2
+    3
+    ...
+```
+
+**Keep this running!** The packet counter will keep increasing.
+
+---
+
+#### Step 4: Trigger WhatsApp Activity & Verify SSL Keys
+
+**While tshark is running, send WhatsApp messages to generate traffic.**
+
+**In a NEW SSH session, check if SSL keys are being generated:**
+
+```bash
+# Check if sslkeys.log is being created
+ls -la /var/www/tgwabridge/wireshark/
+
+# View keys (should see CLIENT_RANDOM lines)
+tail -f /var/www/tgwabridge/wireshark/sslkeys.log
+```
+
+**Expected:** Lines like `CLIENT_RANDOM a1b2c3... d4e5f6...`
+
+**If file doesn't exist:** Container needs to be restarted after code change:
+```bash
+docker-compose restart
+```
+
+**After seeing SSL keys being logged, send more test messages, then stop capture:**
+
+```bash
+# In the tshark terminal, press Ctrl+C to stop
+```
+
+**Verify capture file size:**
+```bash
+ls -lh /var/www/tgwabridge/wireshark/whatsapp-capture.pcapng
+```
+
+**Expected:** File size > 1MB (should have captured traffic)
 
 ---
 

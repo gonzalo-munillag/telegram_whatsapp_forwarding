@@ -20,8 +20,10 @@ RUN apk add --no-cache \
     g++
 
 # Tell Puppeteer to skip downloading Chrome (we already have Chromium)
+# SSLKEYLOGFILE enables TLS key export for Wireshark analysis
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    SSLKEYLOGFILE=/app/wireshark/sslkeys.log
 
 # Create app directory
 # This is where our application code will live inside the container
@@ -43,9 +45,9 @@ COPY test-telegram.js ./
 COPY test-whatsapp.js ./
 COPY get-friend-id.js ./
 
-# Create directory for session files
+# Create directory for session files and Wireshark keys
 # These directories will store Telegram and WhatsApp authentication sessions
-RUN mkdir -p .wwebjs_auth .wwebjs_cache && \
+RUN mkdir -p .wwebjs_auth .wwebjs_cache wireshark && \
     chown -R node:node /app
 
 # Switch to non-root user for security

@@ -64,3 +64,8 @@ METADATA_INSPECTOR_CHANGES.md
 
 # Metadata logs (contain real message data)
 metadata_logs/
+
+# Wireshark captures and SSL keys (sensitive network data)
+wireshark/
+*.pcap
+*.pcapng

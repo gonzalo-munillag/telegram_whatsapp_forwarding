@@ -36,6 +36,9 @@ services:
       # WhatsApp session data (authentication)
       - whatsapp-auth:/app/.wwebjs_auth
       - whatsapp-cache:/app/.wwebjs_cache
+      
+      # Wireshark SSL keys for network analysis
+      - ./wireshark:/app/wireshark:rw
     
     # Security: Run as non-root user
     # The Dockerfile already sets USER node, but this ensures it

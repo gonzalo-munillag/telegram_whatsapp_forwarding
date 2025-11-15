@@ -738,20 +738,7 @@ client.on('message_create', async (msg) => {
     log(`  • ISP/Network: ${ipInfo.org || 'Unknown'}`);
     log(`  → Meta could determine: ISP/organization from IP WHOIS lookup`);
     
-    /**
-     * Mobile operator
-     * 
-     * Only visible when using cellular data (not WiFi)
-     * Examples: "T-Mobile USA", "Verizon Wireless"
-     * 
-     * Why not showing?
-     * - You're on WiFi (ipInfo.org shows ISP, not mobile carrier)
-     * - Mobile operator only visible in phone's connection metadata
-     * - WhatsApp Web doesn't expose this (phone-only)
-     */
-    log(`  • Mobile operator: ${msg.deviceType === 'android' || msg.deviceType === 'ios' ? 'Visible when using mobile data (you\'re on WiFi)' : 'N/A - using WiFi'}`);
-    
-    /**
+     /**
      * Language settings
      * 
      * HOW META GETS THIS:
